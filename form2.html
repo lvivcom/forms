@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>SS site</title>
+</head>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<div id="selector">
+<!-- Вибір продукції --> 
+</div>
+<div id="result">
+<!-- Форма замовлення -->
+</div>
+
+
+<script>
+	var priceData = {
+		title: "Виберіть продукцію",
+		options : [{label: 'візитки', select: {title: "кількість", 
+	        options : [{label: '100 шт', select: {title: "Виберіть тип друку", 
+	            options : [{label: 'шовкодрук', select: {title: "Виберіть кількість сторін друку", 
+	                options : [ {label: 'односторонній',}, {label: 'двосторонній', data: [{label: 'Вартість', value: '250 грн'}]},]
+				}
+	                
+	            },							
+									                                                {label: 'цифровии друк',},
+								]
+							}							
+							
+						},
+					
+			{label: '1000 шт',},							
+					
+					]
+				}
+			},
+			{label: 'футболки',	value: '1 футболка. Колір білий. Вартість 235 грн',}
+		]
+	}
+
+	function TSEL(ids, idr, data) {
+		this.data = data;
+		this.SC = 0;
+		this.IDSobj = jQuery('#' + ids).get(0);
+		this.IDRobj = jQuery('#' + idr).get(0);
+		
+		this.buildSelect = function(data) {
+			var id = 's' + this.SC;
+			this.SC++;
+			jQuery(this.IDSobj).append('<div id="' + id + '">' + data.title + '<br /><select><option value="-1">-- оберіть --</option></select></div>');
+			var SL = jQuery(this.IDSobj).find('#' + id + ' select').get(0);
+			console.log(data.options);
+			for (var i = 0; i < data.options.length; i++) {
+				SL.options[i + 1] = new Option(data.options[i].label, i);
+			}
+			link = this;
+			jQuery(SL).change(function () {
+				link.doChild(this, this.value, data);
+			});			
+			jQuery(this.IDRobj).html('');
+		}
+		this.buildResult = function(data) {
+			var str = '<div>Ваше замовлення:' + data.value + '</div>';
+			
+			if (data.data != undefined) 
+				for (var i = 0; i < data.data.length; i ++) 
+					str += '<li>' + data.data[i].label + ' : ' + data.data[i].value + '</li>';
+			
+			jQuery(this.IDRobj).html(str);
+		}
+		this.doChild = function (SLobj, value, data) {
+			var found = false;
+			jQuery(this.IDSobj).children().each(function (index, element) {
+				if (found)
+					jQuery(element).remove();
+				else 
+					if (element == jQuery(SLobj).parent().get(0)) found = true;
+			}); 
+			jQuery(this.IDRobj).html('');
+			if (data.options[value] != undefined) {
+				if (data.options[value].select != undefined)
+					this.do(data.options[value].select);
+				else
+					this.buildResult(data.options[value]);
+			}
+			
+		}
+		this.do = function(data) {
+			if (data.options != undefined) 
+				this.buildSelect(data);
+				
+			if (data.value != undefined) 
+				this.buildResult(data);
+			else
+				jQuery(this.IDRobj).html('');
+		}
+		this.do(data);
+	}
+	
+	var TS = new TSEL("selector", "result", priceData);
+	
+</script>
